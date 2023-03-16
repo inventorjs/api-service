@@ -12,10 +12,13 @@ export function mergeConfig(...configList: ApiConfig[]) {
       ...(config?.apiService ?? {}),
     }
 
-    const headers: RequestHeaders = {
+    const headers: RequestHeaders = Object.entries({
       ...(result?.headers ?? {}),
       ...(config?.headers ?? {}),
-    }
+    }).reduce(
+      (result, [key, val]) => ({ ...result, [String(key).toLowerCase()]: val }),
+      {},
+    )
 
     const requestInterceptors = (
       result.apiService?.requestInterceptors ?? []
