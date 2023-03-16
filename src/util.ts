@@ -1,16 +1,23 @@
 /**
  * util
  */
-import type { ApiConfig } from './types.js'
+import type { ApiConfig, RequestHeaders, Headers } from './types.js'
+import { HEADER_USER_AGENT } from './constants.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   return configList.reduce((result, config) => {
     if (!config) return result
 
     const apiService = {
-      ...(result.apiService ?? {}),
-      ...(config.apiService ?? {}),
+      ...(result?.apiService ?? {}),
+      ...(config?.apiService ?? {}),
     }
+
+    const headers: RequestHeaders = {
+      ...(result?.headers ?? {}),
+      ...(config?.headers ?? {}),
+    }
+
     const requestInterceptors = (
       result.apiService?.requestInterceptors ?? []
     ).concat(config.apiService?.requestInterceptors ?? [])
@@ -21,18 +28,18 @@ export function mergeConfig(...configList: ApiConfig[]) {
     return {
       ...result,
       ...config,
+      headers,
       apiService: {
         ...apiService,
         requestInterceptors,
         responseInterceptors,
       },
     }
-  }, {} as ApiConfig)
+  }, {})
 }
 
-export function processUrlParams(config: ApiConfig) {
-  if (!config) return {}
-  let { url } = config
+function processUrlParams(config: ApiConfig) {
+  let url = config?.url ?? ''
   if (
     config.apiService?.urlParams &&
     Object.keys(config.apiService.urlParams).length > 0
@@ -41,8 +48,20 @@ export function processUrlParams(config: ApiConfig) {
       url = url?.replace(`:${key}`, String(val)) 
     })
   }
-  if (url !== config.url) {
-    return { ...config, url }
+  return url
+}
+
+function processHeaders(config: ApiConfig) {
+  let headers = config?.headers ?? {}
+  if (config.apiService?.userAgent) {
+    headers = { ...headers, [HEADER_USER_AGENT]: config.apiService.userAgent }
   }
-  return config
+
+  return headers
+}
+
+export function processConfig(config: ApiConfig) {
+  const url = processUrlParams(config)
+  const headers = processHeaders(config) as Headers
+  return { ...config, url, headers }
 }

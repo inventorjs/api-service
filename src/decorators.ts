@@ -7,14 +7,14 @@ import { mergeConfig } from './util.js'
 import { ApiService } from './core.js'
 
 export function Service(serviceConfig: ApiConfig) {
-  return (Cls: ClassType) => {
+  return (Cls: ClassType<ApiService>) => {
     Reflect.defineMetadata(CONFIG_META, serviceConfig, Cls)
   }
 }
 
 export function Api(apiConfig: ApiConfig) {
   return (
-    Cls: ClassType,
+    Cls: ClassType<ApiService>,
     propertyKey: string,
     propertyDescriptor: PropertyDescriptor,
   ) => {

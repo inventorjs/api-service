@@ -3,12 +3,13 @@
  */
 import type {
   AxiosInstance,
-  AxiosRequestHeaders,
   AxiosRequestConfig,
   AxiosInterceptorManager,
   AxiosResponse,
   InternalAxiosRequestConfig,
+  AxiosHeaders,
 } from 'axios'
+
 type RequestInteceptorInternal = Parameters<
   AxiosInterceptorManager<InternalAxiosRequestConfig>['use']
 >
@@ -24,9 +25,11 @@ export type ResponseInteceptorOnFulfilled = ResponseInteceptorInternal[0]
 export type ResponseInteceptorOnRejected = ResponseInteceptorInternal[1]
 export type ResponseInteceptorOptions = ResponseInteceptorInternal[2]
 
-export type ClassType = { new (): void }
+export type ClassType<T = unknown> = { new (): T }
 export type Instance = AxiosInstance
 export type Response<T = unknown, D = unknown> = AxiosResponse<T, D>
+export type RequestHeaders = AxiosRequestConfig['headers']
+export type Headers = AxiosHeaders
 
 export abstract class RequestInterceptor {
   static options: RequestInteceptorOptions
@@ -41,9 +44,9 @@ export abstract class ResponseInterceptor {
 }
 
 export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
-  headers?: AxiosRequestHeaders;
   apiService?: {
-    observe?: 'body' | 'response',
+    userAgent?: string
+    observe?: 'body' | 'response'
     urlParams?: Record<string, number | string>
     requestInterceptors?: (typeof RequestInterceptor)[]
     responseInterceptors?: (typeof ResponseInterceptor)[]

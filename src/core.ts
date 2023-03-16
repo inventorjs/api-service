@@ -3,7 +3,7 @@
  */
 import type { ClassType, ApiConfig, Instance } from './types.js'
 import axios from 'axios'
-import { mergeConfig, processUrlParams } from './util.js'
+import { mergeConfig, processConfig } from './util.js'
 import { CONFIG_META, INSTANCE_META } from './constants.js'
 import { defaults } from './defaults.js'
 
@@ -14,7 +14,7 @@ export class ApiService {
     services,
     config: rootConfig = {},
   }: {
-    services: Record<string, ClassType>
+    services: Record<string, ClassType<ApiService>>
     config?: ApiConfig
   }) {
     if (this.inited) {
@@ -68,7 +68,7 @@ export class ApiService {
     }
     const instanceConfig = instance.defaults as unknown as ApiConfig
     const fullConfig = mergeConfig(instanceConfig, config)
-    const requestConfig = processUrlParams(config)
+    const requestConfig = processConfig(fullConfig)
 
     const response = await instance.request(requestConfig)
 
