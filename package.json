@@ -4,10 +4,11 @@
   "description": "api service",
   "author": "sunkeysun",
   "license": "MIT",
+  "repository": "https://github.com/inventorjs/api-service.git",
   "type": "module",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "files": [
-    "lib/"
+    "dist/"
   ],
   "packageManager": "pnpm@7.13.2",
   "publishConfig": {
@@ -17,9 +18,9 @@
     "dev": "tsc --watch",
     "test": "ts-node-esm test/index.ts",
     "build": "rimraf dist && tsc",
-    "publish:patch": "pnpm build && pnpm -r exec pnpm version patch && pnpm -r publish",
-    "publish:minor": "pnpm build && pnpm -r exec pnpm version minor && pnpm -r publish",
-    "publish:major": "pnpm build && pnpm -r exec pnpm version major && pnpm -r publish"
+    "publish:patch": "pnpm build && pnpm version patch && pnpm publish",
+    "publish:minor": "pnpm build && pnpm version minor && pnpm publish",
+    "publish:major": "pnpm build && pnpm version major && pnpm publish"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
