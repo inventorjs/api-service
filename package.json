@@ -10,10 +10,16 @@
     "lib/"
   ],
   "packageManager": "pnpm@7.13.2",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "tsc --watch",
     "test": "ts-node-esm test/index.ts",
-    "build": "rimraf dist && tsc"
+    "build": "rimraf dist && tsc",
+    "publish:patch": "pnpm build && pnpm -r exec pnpm version patch && pnpm -r publish",
+    "publish:minor": "pnpm build && pnpm -r exec pnpm version minor && pnpm -r publish",
+    "publish:major": "pnpm build && pnpm -r exec pnpm version major && pnpm -r publish"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
