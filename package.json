@@ -7,8 +7,15 @@
   "repository": "https://github.com/inventorjs/api-service.git",
   "type": "module",
   "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist-legacy/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
-    "dist/"
+    "dist/",
+    "dist-legacy/"
   ],
   "packageManager": "pnpm@7.13.2",
   "publishConfig": {
@@ -17,7 +24,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "test": "ts-node-esm test/index.ts",
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist dist-legacy && tsc && tsc -p tsconfig.cjs.json",
     "publish:patch": "pnpm build && pnpm version patch && pnpm publish",
     "publish:minor": "pnpm build && pnpm version minor && pnpm publish",
     "publish:major": "pnpm build && pnpm version major && pnpm publish"
