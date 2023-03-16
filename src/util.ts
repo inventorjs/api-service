@@ -5,6 +5,8 @@ import type { ApiConfig } from './types.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   return configList.reduce((result, config) => {
+    if (!config) return result
+
     const apiService = {
       ...(result.apiService ?? {}),
       ...(config.apiService ?? {}),
