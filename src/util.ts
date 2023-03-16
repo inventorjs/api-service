@@ -1,11 +1,14 @@
 /**
- * 工具函数
+ * util
  */
-import { ApiConfig } from './types.js'
+import type { ApiConfig } from './types.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   return configList.reduce((result, config) => {
-    const apiService = {...(result.apiService ?? {}), ...(config.apiService ?? {})}
+    const apiService = {
+      ...(result.apiService ?? {}),
+      ...(config.apiService ?? {}),
+    }
     const requestInterceptors = (
       result.apiService?.requestInterceptors ?? []
     ).concat(config.apiService?.requestInterceptors ?? [])
@@ -22,5 +25,21 @@ export function mergeConfig(...configList: ApiConfig[]) {
         responseInterceptors,
       },
     }
-  }, {})
+  }, {} as ApiConfig)
+}
+
+export function processUrlParams(config: ApiConfig) {
+  let { url } = config
+  if (
+    config.apiService?.urlParams &&
+    Object.keys(config.apiService.urlParams).length > 0
+  ) {
+    Object.entries(config.apiService.urlParams).forEach(([key, val]) => {
+      url = url?.replace(`:${key}`, String(val)) 
+    })
+  }
+  if (url !== config.url) {
+    return { ...config, url }
+  }
+  return config
 }
