@@ -1,7 +1,7 @@
 /**
  * util
  */
-import type { ApiConfig, RequestHeaders, Headers } from './types.js'
+import type { ApiConfig, RequestHeaders } from './types.js'
 import { HEADER_USER_AGENT } from './constants.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
@@ -45,7 +45,7 @@ function processUrlParams(config: ApiConfig) {
     Object.keys(config.apiService.urlParams).length > 0
   ) {
     Object.entries(config.apiService.urlParams).forEach(([key, val]) => {
-      url = url?.replace(`:${key}`, String(val)) 
+      url = url?.replace(`:${key}`, String(val))
     })
   }
   return url
@@ -62,6 +62,8 @@ function processHeaders(config: ApiConfig) {
 
 export function processConfig(config: ApiConfig) {
   const url = processUrlParams(config)
-  const headers = processHeaders(config) as Headers
-  return { ...config, url, headers }
+  const headers = processHeaders(config)
+  return [config].reduce((result) => {
+    return { ...result, url, headers }
+  }, config)
 }

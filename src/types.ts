@@ -29,7 +29,6 @@ export type ClassType<T = unknown> = { new (): T }
 export type Instance = AxiosInstance
 export type Response<T = unknown, D = unknown> = AxiosResponse<T, D>
 export type RequestHeaders = AxiosRequestConfig['headers']
-export type Headers = AxiosHeaders
 
 export abstract class RequestInterceptor {
   static options: RequestInteceptorOptions
