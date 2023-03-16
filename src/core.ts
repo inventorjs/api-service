@@ -1,7 +1,7 @@
 /**
  * core logic
  */
-import type { ClassType, ApiConfig } from './types.js'
+import type { ClassType, ApiConfig, Instance } from './types.js'
 import axios from 'axios'
 import { mergeConfig, processUrlParams } from './util.js'
 import { CONFIG_META, INSTANCE_META } from './constants.js'
@@ -60,16 +60,19 @@ export class ApiService {
   }
 
   static async apiCall<T>(this: ApiService, config: ApiConfig) {
-    const instance = Reflect.getMetadata(INSTANCE_META, this)
+    const instance: Instance = Reflect.getMetadata(INSTANCE_META, this)
     if (!instance) {
       throw new Error(
         `Instance not exist for ${(this as { name: string }).name}`,
       )
     }
-    const processedConfig = processUrlParams(config)
-    const response = await instance.request(processedConfig)
+    const instanceConfig = instance.defaults as unknown as ApiConfig
+    const fullConfig = mergeConfig(instanceConfig, config)
+    const requestConfig = processUrlParams(config)
 
-    if (config.apiService?.observe === 'response') {
+    const response = await instance.request(requestConfig)
+
+    if (fullConfig?.apiService?.observe === 'response') {
       return response as T
     }
     return response.data as T

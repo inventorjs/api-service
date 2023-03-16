@@ -29,6 +29,7 @@ export function mergeConfig(...configList: ApiConfig[]) {
 }
 
 export function processUrlParams(config: ApiConfig) {
+  if (!config) return {}
   let { url } = config
   if (
     config.apiService?.urlParams &&
