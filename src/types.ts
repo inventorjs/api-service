@@ -44,7 +44,6 @@ export abstract class ResponseInterceptor {
 
 export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
   apiService?: {
-    userAgent?: string
     observe?: 'body' | 'response'
     urlParams?: Record<string, number | string>
     requestInterceptors?: (typeof RequestInterceptor)[]

@@ -2,7 +2,6 @@
  * util
  */
 import type { ApiConfig, RequestHeaders } from './types.js'
-import { HEADER_USER_AGENT } from './constants.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   return configList.reduce((result, config) => {
@@ -51,19 +50,9 @@ function processUrlParams(config: ApiConfig) {
   return url
 }
 
-function processHeaders(config: ApiConfig) {
-  let headers = config?.headers ?? {}
-  if (config.apiService?.userAgent) {
-    headers = { ...headers, [HEADER_USER_AGENT]: config.apiService.userAgent }
-  }
-
-  return headers
-}
-
 export function processConfig(config: ApiConfig) {
   const url = processUrlParams(config)
-  const headers = processHeaders(config)
   return [config].reduce((result) => {
-    return { ...result, url, headers }
+    return { ...result, url }
   }, config)
 }
