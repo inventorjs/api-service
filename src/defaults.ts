@@ -1,10 +1,18 @@
 /**
  * internal defaults
  */
-import type { ApiConfig } from './types.js'
+import {
+  RuntimeRequestInterceptor,
+  RuntimeResponseInterceptor,
+} from './interceptors.js'
+import { ApiConfig } from './types.js'
 
 export const defaults: ApiConfig = {
+  maxRedirects: 0,
+  apiServiceRuntime: {},
   apiService: {
-    observe: 'body'
+    observe: 'body',
+    requestInterceptors: [RuntimeRequestInterceptor],
+    responseInterceptors: [RuntimeResponseInterceptor],
   },
 }

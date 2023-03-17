@@ -12,13 +12,10 @@ export function mergeConfig(...configList: ApiConfig[]) {
       ...(config?.apiService ?? {}),
     }
 
-    const headers: RequestHeaders = Object.entries({
+    const headers: RequestHeaders = lowercaseKey<RequestHeaders>({
       ...(result?.headers ?? {}),
       ...(config?.headers ?? {}),
-    }).reduce(
-      (result, [key, val]) => ({ ...result, [String(key).toLowerCase()]: val }),
-      {},
-    )
+    })
 
     const requestInterceptors = (
       result.apiService?.requestInterceptors ?? []
@@ -46,8 +43,9 @@ function processUrlParams(config: ApiConfig) {
     config.apiService?.urlParams &&
     Object.keys(config.apiService.urlParams).length > 0
   ) {
-    Object.entries(config.apiService.urlParams).forEach(([key, val]) => {
-      url = url?.replace(`:${key}`, String(val))
+    const { urlParams } = config.apiService
+    Object.keys(urlParams).forEach((key) => {
+      url = url?.replace(`:${key}`, String(urlParams[key]))
     })
   }
   return url
@@ -58,4 +56,16 @@ export function processConfig(config: ApiConfig) {
   return [config].reduce((result) => {
     return { ...result, url }
   }, config)
+}
+
+export function lowercaseKey<
+  T extends Record<string, unknown> | undefined = Record<string, unknown>,
+>(obj: T) {
+  if (!obj) return obj
+  return Object.keys(obj).reduce((result, key) => {
+    return {
+      ...result,
+      [String(key).toLowerCase()]: obj[key],
+    }
+  }, {} as T)
 }
