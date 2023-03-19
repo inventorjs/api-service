@@ -31,8 +31,8 @@ export class ApiService {
       const definedConfig = mergeConfig(defaults, rootConfig, serviceConfig)
       const instance = axios.create(definedConfig)
 
-      if (definedConfig.apiService?.requestInterceptors && instance) {
-        definedConfig.apiService?.requestInterceptors.forEach(
+      if (definedConfig.$apiService?.requestInterceptors && instance) {
+        definedConfig.$apiService?.requestInterceptors.forEach(
           (requestInterceptor) => {
             instance.interceptors.request.use(
               requestInterceptor.onFulfilled,
@@ -43,8 +43,8 @@ export class ApiService {
         )
       }
 
-      if (definedConfig.apiService?.responseInterceptors && instance) {
-        definedConfig.apiService?.responseInterceptors.forEach(
+      if (definedConfig.$apiService?.responseInterceptors && instance) {
+        definedConfig.$apiService?.responseInterceptors.forEach(
           (responseInterceptor) => {
             instance.interceptors.response.use(
               responseInterceptor.onFulfilled,
@@ -59,22 +59,27 @@ export class ApiService {
     })
   }
 
-  static async apiCall<T>(this: ApiService, config: ApiConfig) {
+  static async apiCall<R, D = unknown>(
+    this: ApiService,
+    data?: D,
+    config: ApiConfig = {},
+  ) {
     const instance: Instance = Reflect.getMetadata(INSTANCE_META, this)
     if (!instance) {
       throw new Error(
         `Instance not exist for ${(this as { name: string }).name}`,
       )
     }
+
     const instanceConfig = instance.defaults as unknown as ApiConfig
-    const fullConfig = mergeConfig(instanceConfig, config)
+    const fullConfig = mergeConfig(instanceConfig, config, { data })
     const requestConfig = processConfig(fullConfig)
 
     const response = await instance.request(requestConfig)
 
-    if (fullConfig?.apiService?.observe === 'response') {
-      return response as T
+    if (requestConfig?.$apiService?.observe === 'response') {
+      return response as R
     }
-    return response.data as T
+    return response?.data as R
   }
 }

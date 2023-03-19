@@ -19,9 +19,9 @@ export function Api(apiConfig: ApiConfig) {
     propertyDescriptor: PropertyDescriptor,
   ) => {
     const context = {
-      [propertyKey]: async (requestConfig: ApiConfig) => {
+      [propertyKey]: async (data: unknown, requestConfig: ApiConfig) => {
         const config = mergeConfig(apiConfig, requestConfig)
-        return ApiService.apiCall.call(Cls, config)
+        return ApiService.apiCall.call(Cls, data, config)
       },
     }
     propertyDescriptor.value = context[propertyKey]
