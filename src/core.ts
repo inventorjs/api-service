@@ -31,8 +31,8 @@ export class ApiService {
       const definedConfig = mergeConfig(defaults, rootConfig, serviceConfig)
       const instance = axios.create(definedConfig)
 
-      if (definedConfig.apiService?.requestInterceptors && instance) {
-        definedConfig.apiService?.requestInterceptors.forEach(
+      if (definedConfig.$apiService?.requestInterceptors && instance) {
+        definedConfig.$apiService?.requestInterceptors.forEach(
           (requestInterceptor) => {
             instance.interceptors.request.use(
               requestInterceptor.onFulfilled,
@@ -43,8 +43,8 @@ export class ApiService {
         )
       }
 
-      if (definedConfig.apiService?.responseInterceptors && instance) {
-        definedConfig.apiService?.responseInterceptors.forEach(
+      if (definedConfig.$apiService?.responseInterceptors && instance) {
+        definedConfig.$apiService?.responseInterceptors.forEach(
           (responseInterceptor) => {
             instance.interceptors.response.use(
               responseInterceptor.onFulfilled,
@@ -59,7 +59,11 @@ export class ApiService {
     })
   }
 
-  static async apiCall<R, D = unknown>(this: ApiService, data?: D, config: ApiConfig = {}) {
+  static async apiCall<R, D = unknown>(
+    this: ApiService,
+    data?: D,
+    config: ApiConfig = {},
+  ) {
     const instance: Instance = Reflect.getMetadata(INSTANCE_META, this)
     if (!instance) {
       throw new Error(
@@ -73,7 +77,7 @@ export class ApiService {
 
     const response = await instance.request(requestConfig)
 
-    if (requestConfig?.apiService?.observe === 'response') {
+    if (requestConfig?.$apiService?.observe === 'response') {
       return response as R
     }
     return response?.data as R

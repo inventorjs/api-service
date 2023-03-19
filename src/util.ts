@@ -2,14 +2,15 @@
  * util
  */
 import type { ApiConfig, RequestHeaders } from './types.js'
+import { v4 } from 'uuid'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   return configList.reduce((result, config) => {
     if (!config) return result
 
     const apiService = {
-      ...(result?.apiService ?? {}),
-      ...(config?.apiService ?? {}),
+      ...(result?.$apiService ?? {}),
+      ...(config?.$apiService ?? {}),
     }
 
     const headers: RequestHeaders = lowercaseKey<RequestHeaders>({
@@ -18,11 +19,11 @@ export function mergeConfig(...configList: ApiConfig[]) {
     })
 
     const requestInterceptors = (
-      result.apiService?.requestInterceptors ?? []
-    ).concat(config.apiService?.requestInterceptors ?? [])
+      result.$apiService?.requestInterceptors ?? []
+    ).concat(config.$apiService?.requestInterceptors ?? [])
     const responseInterceptors = (
-      result.apiService?.responseInterceptors ?? []
-    ).concat(config.apiService?.responseInterceptors ?? [])
+      result.$apiService?.responseInterceptors ?? []
+    ).concat(config.$apiService?.responseInterceptors ?? [])
 
     return {
       ...result,
@@ -40,10 +41,10 @@ export function mergeConfig(...configList: ApiConfig[]) {
 function processUrlParams(config: ApiConfig) {
   let url = config?.url ?? ''
   if (
-    config.apiService?.urlParams &&
-    Object.keys(config.apiService.urlParams).length > 0
+    config.$apiService?.urlParams &&
+    Object.keys(config.$apiService.urlParams).length > 0
   ) {
-    const { urlParams } = config.apiService
+    const { urlParams } = config.$apiService
     Object.keys(urlParams).forEach((key) => {
       url = url?.replace(`:${key}`, String(urlParams[key]))
     })
@@ -68,4 +69,12 @@ export function lowercaseKey<
       [String(key).toLowerCase()]: obj[key],
     }
   }, {} as T)
+}
+
+export function uuid() {
+  return v4()
+}
+
+export function wrapReturn<T = unknown>(data: T) {
+  return [data].reduce((_, data) => data)
 }

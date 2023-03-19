@@ -8,10 +8,15 @@ import {
 import { ApiConfig } from './types.js'
 
 export const defaults: ApiConfig = {
+  timeout: 10000,
   maxRedirects: 0,
-  apiServiceRuntime: {},
-  apiService: {
+  $runtime: {},
+  $apiService: {
     observe: 'body',
+    logger: {
+      level: 'info',
+      instance: console,
+    },
     requestInterceptors: [RuntimeRequestInterceptor],
     responseInterceptors: [RuntimeResponseInterceptor],
   },
