@@ -16,7 +16,7 @@
   },
   "scripts": {
     "dev": "tsc --watch",
-    "test": "ts-node-esm src/__test/index.ts",
+    "test": "ts-node-esm src/__test__/index.ts",
     "build": "rimraf dist && tsc",
     "publish:patch": "pnpm build && pnpm version patch && pnpm publish",
     "publish:minor": "pnpm build && pnpm version minor && pnpm publish",
