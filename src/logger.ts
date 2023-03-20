@@ -2,11 +2,11 @@
  * logger
  */
 import type {
-  ApiConfig,
   Response,
   Logger,
   ResponseError,
   LoggerConfig,
+  ApiConfigFinal,
 } from './types.js'
 
 type logFun = keyof Logger
@@ -18,7 +18,7 @@ export function writeLog({
   reqId,
   error,
 }: {
-  config: ApiConfig
+  config: ApiConfigFinal
   response?: Response
   responseTime: number
   reqId: string
@@ -52,14 +52,14 @@ export function writeLog({
       method: config.method,
       query: config.params,
       params: config.$apiService?.urlParams,
-      headers: config.headers,
+      headers: config.headers.toJSON(),
       pathname: urlObj.pathname,
       body: config.data,
     },
     [resKey]: {
       statusCode: response?.status ?? 0,
       statusText: response?.statusText ?? '',
-      headers: response?.headers,
+      headers: response?.headers?.toJSON(),
       body: response?.data,
     },
     [responseTimeKey]: responseTime,
