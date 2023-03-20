@@ -7,12 +7,11 @@ import {
 } from '../index.js'
 
 @Service({
-  // baseURL: 'http://127.0.0.1:8000',
-  baseURL: 'http://10.10.10.10',
+  baseURL: 'http://cloud.tencent.com',
 })
 class Test extends ApiService {
   @Api({ url: '/:id' })
-  static login(data?: any, config?: ApiConfig<string>) {
+  static login(data?: unknown, config?: ApiConfig<string>) {
     return this.apiCall<string>(data, config)
   }
 }
@@ -27,4 +26,10 @@ ApiService.init({
   },
 })
 
-Test.login('123', { $apiService: { urlParams: { id: 'act' } } })
+Test.login('123', {
+  $apiService: {
+    urlParams: { id: 'act' },
+    reqIdHeaderName: 'x-req-id',
+    retry: 3,
+  },
+}).catch((e) => console.log(e))

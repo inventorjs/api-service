@@ -3,6 +3,7 @@
  */
 import type { ClassType, ApiConfig, Instance } from './types.js'
 import axios from 'axios'
+import { defer, lastValueFrom, retry, timer } from 'rxjs'
 import { mergeConfig, processConfig } from './util.js'
 import { CONFIG_META, INSTANCE_META } from './constants.js'
 import { defaults } from './defaults.js'
@@ -87,8 +88,19 @@ export class ApiService {
     const instanceConfig = instance.defaults as unknown as ApiConfig
     const fullConfig = mergeConfig(instanceConfig, config, { data })
     const requestConfig = processConfig(fullConfig)
+    let retryCount = requestConfig.$apiService?.retry
+    if (!retryCount || (requestConfig?.method ?? 'get' !== 'get')) {
+      retryCount = 0
+    }
 
-    const response = await instance.request(requestConfig)
+    const response = await lastValueFrom(
+      defer(() => instance.request(requestConfig)).pipe(
+        retry({
+          count: retryCount,
+          delay: (_, retryCount) => timer(Math.pow(retryCount, 2) * 1000),
+        }),
+      ),
+    )
 
     if (requestConfig?.$apiService?.observe === 'response') {
       return response as R

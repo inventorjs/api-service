@@ -25,9 +25,9 @@ class DefaultLogger {
 export const defaults = {
   timeout: 10000,
   maxRedirects: 0,
-  $runtime: {},
   $apiService: {
     observe: 'body',
+    retry: 0,
     genReqId: uuid,
     logger: {
       logger: DefaultLogger,

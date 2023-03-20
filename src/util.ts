@@ -3,7 +3,6 @@
  */
 import type { ApiConfig, LoggerConfig, RequestHeaders } from './types.js'
 import { v4 } from 'uuid'
-import { REQ_ID_HEADER, REQ_START_HEADER } from './constants.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   const mergedConfig = configList.reduce((result, config) => {
@@ -96,12 +95,4 @@ export function wrapReturn<T = unknown>(data: T) {
 
 export function isObject(obj: unknown) {
   return !!obj && typeof obj === 'object'
-}
-
-export function getReqIdHeaderName(config: ApiConfig) {
-  return config.$apiService?.reqIdHeaderName ?? REQ_ID_HEADER
-}
-
-export function getReqStartHeaderName(config: ApiConfig) {
-  return config.$apiService?.reqStartHeaderName ?? REQ_START_HEADER
 }

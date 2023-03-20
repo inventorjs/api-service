@@ -72,16 +72,21 @@ export interface LoggerConfig {
 }
 
 export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
+  $runtime?: {
+    startTime?: number
+    reqId?: string
+    [k: string]: unknown
+  }
   $apiService?: {
     observe?: 'body' | 'response'
+    rc?: string
+    retry?: number
     reqIdHeaderName?: string
-    reqStartHeaderName?: string
-    genReqId?: { (config: ApiConfig): string | number }
+    genReqId?: { (config: ApiConfig): string }
     logger?: boolean | LoggerConfig
     urlParams?: Record<string, number | string>
     requestInterceptors?: (typeof RequestInterceptor)[]
     responseInterceptors?: (typeof ResponseInterceptor)[]
-    [k: string]: unknown
   }
 }
 
