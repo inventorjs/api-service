@@ -7,6 +7,7 @@ import type {
   ResponseError,
   LoggerConfig,
   ApiConfigFinal,
+  Headers,
 } from './types.js'
 
 type logFun = keyof Logger
@@ -59,7 +60,7 @@ export function writeLog({
     [resKey]: {
       statusCode: response?.status ?? 0,
       statusText: response?.statusText ?? '',
-      headers: response?.headers?.toJSON(),
+      headers: (response?.headers as Headers)?.toJSON?.() ?? response?.headers,
       body: response?.data,
     },
     [responseTimeKey]: responseTime,

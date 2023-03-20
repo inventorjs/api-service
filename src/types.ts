@@ -30,7 +30,6 @@ export type ClassType<T = unknown> = { new (): T }
 export type Instance = AxiosInstance
 export type Response<T = unknown, D = unknown> = AxiosResponse<T, D> & {
   config: ApiConfigFinal
-  headers: AxiosHeaders
 }
 export type Headers = AxiosHeaders
 export type RequestHeaders = AxiosRequestConfig['headers']
