@@ -21,17 +21,28 @@ export class ApiService {
       throw new Error('ApiService can only be initialized once!')
     }
     if (!Object.keys(services).length) {
-      console.error('There is no service to initialize.')
+      console.error(
+        'There is no service to initialize. please check services config',
+      )
       return
     }
     this.inited = true
 
     Object.values(services).forEach((Srv) => {
-      const serviceConfig = Reflect.getMetadata(CONFIG_META, Srv) ?? {}
-      const definedConfig = mergeConfig(defaults, rootConfig, serviceConfig)
+      const serviceConfig = Reflect.getMetadata(CONFIG_META, Srv)
+      if (!serviceConfig) {
+        throw new Error(
+          `Service class must decorated by @Service, please check [${Srv}]`,
+        )
+      }
+      const definedConfig = mergeConfig(
+        defaults as ApiConfig,
+        rootConfig,
+        serviceConfig,
+      )
       const instance = axios.create(definedConfig)
 
-      if (definedConfig.$apiService?.requestInterceptors && instance) {
+      if (definedConfig.$apiService?.requestInterceptors) {
         definedConfig.$apiService?.requestInterceptors.forEach(
           (requestInterceptor) => {
             instance.interceptors.request.use(
@@ -43,7 +54,7 @@ export class ApiService {
         )
       }
 
-      if (definedConfig.$apiService?.responseInterceptors && instance) {
+      if (definedConfig.$apiService?.responseInterceptors) {
         definedConfig.$apiService?.responseInterceptors.forEach(
           (responseInterceptor) => {
             instance.interceptors.response.use(
@@ -67,7 +78,9 @@ export class ApiService {
     const instance: Instance = Reflect.getMetadata(INSTANCE_META, this)
     if (!instance) {
       throw new Error(
-        `Instance not exist for ${(this as { name: string }).name}`,
+        `Service instance not exist for ${
+          (this as { name: string }).name
+        }, service must decorated by @Service`,
       )
     }
 

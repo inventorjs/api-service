@@ -1,63 +1,74 @@
 /**
  * logger
  */
-import { EVENT_REQ_ERROR, EVENT_REQ_FINISH } from './constants.js'
 import type {
   ApiConfig,
   Response,
-  LoggerConfig,
+  Logger,
   ResponseError,
+  LoggerConfig,
 } from './types.js'
 
-export function writeRequestLog({
+type logFun = keyof Logger
+
+export function writeLog({
   config,
   response,
-  duration,
+  responseTime,
   reqId,
   error,
 }: {
   config: ApiConfig
   response?: Response
-  duration: number
+  responseTime: number
   reqId: string
   error?: ResponseError
 }) {
-  const loggerConfig = config.$apiService?.logger
+  const apiService = config.$apiService
+  const loggerConfig = apiService?.logger as LoggerConfig
+
   if (!loggerConfig) {
     return
   }
 
-  const logger = (loggerConfig as LoggerConfig)?.instance ?? console
-  let level: LoggerConfig['level'] = 'info'
+  const logger = loggerConfig.logger as Logger
+  let level: logFun = 'log'
 
   const url = `${config.baseURL}${config.url}`
   const urlObj = new URL(url)
+  const eventKey = loggerConfig?.customAttributeKeys?.event ?? 'event'
+  const reqKey = loggerConfig?.customAttributeKeys?.req ?? 'req'
+  const resKey = loggerConfig?.customAttributeKeys?.res ?? 'res'
+  const responseTimeKey =
+    loggerConfig?.customAttributeKeys?.responseTime ?? 'responseTime'
+  const eventSuccess = loggerConfig?.customEventName?.success ?? 'api-success'
+  const eventError = loggerConfig?.customEventName?.error ?? 'api-error'
 
   const logData = {
-    event: EVENT_REQ_FINISH,
-    req: {
+    [eventKey]: eventSuccess,
+    [reqKey]: {
       id: reqId,
       url,
       method: config.method,
-      query: config.params ?? {},
-      params: config.$apiService?.urlParams ?? {},
+      query: config.params,
+      params: config.$apiService?.urlParams,
       headers: config.headers,
       pathname: urlObj.pathname,
-      body: {},
+      body: config.data,
     },
-    res: {
+    [resKey]: {
       statusCode: response?.status ?? 0,
       statusText: response?.statusText ?? '',
-      headers: response?.headers ?? {},
-      body: response?.data ?? {},
+      headers: response?.headers,
+      body: response?.data,
     },
-    duration,
+    [responseTimeKey]: responseTime,
   }
 
   if (error) {
     level = 'error'
     Object.assign(logData, {
-      event: EVENT_REQ_ERROR,
+      event: eventError,
       err: {
         code: error.code ?? 0,
         message: error.message ?? '',

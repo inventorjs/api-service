@@ -7,7 +7,8 @@ import {
 } from '../index.js'
 
 @Service({
-  baseURL: 'http://127.0.0.1:8000',
+  // baseURL: 'http://127.0.0.1:8000',
+  baseURL: 'http://10.10.10.10',
 })
 class Test extends ApiService {
   @Api({ url: '/:id' })

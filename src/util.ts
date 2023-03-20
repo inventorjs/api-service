@@ -1,14 +1,15 @@
 /**
  * util
  */
-import type { ApiConfig, RequestHeaders } from './types.js'
+import type { ApiConfig, LoggerConfig, RequestHeaders } from './types.js'
 import { v4 } from 'uuid'
+import { REQ_ID_HEADER, REQ_START_HEADER } from './constants.js'
 
 export function mergeConfig(...configList: ApiConfig[]) {
-  return configList.reduce((result, config) => {
+  const mergedConfig = configList.reduce((result, config) => {
     if (!config) return result
 
-    const apiService = {
+    const apiService: ApiConfig['$apiService'] = {
       ...(result?.$apiService ?? {}),
       ...(config?.$apiService ?? {}),
     }
@@ -17,6 +18,18 @@ export function mergeConfig(...configList: ApiConfig[]) {
       ...(result?.headers ?? {}),
       ...(config?.headers ?? {}),
     })
+    let logger = result.$apiService?.logger ?? {}
+    const configLogger = config.$apiService?.logger
+    if (isObject(logger) && isObject(configLogger)) {
+      logger = {
+        ...(logger as LoggerConfig),
+        ...(configLogger as LoggerConfig),
+      }
+    } else {
+      if (configLogger === false) {
+        logger = configLogger
+      }
+    }
 
     const requestInterceptors = (
       result.$apiService?.requestInterceptors ?? []
@@ -29,13 +42,15 @@ export function mergeConfig(...configList: ApiConfig[]) {
       ...result,
       ...config,
       headers,
-      apiService: {
+      $apiService: {
         ...apiService,
+        logger,
         requestInterceptors,
         responseInterceptors,
       },
     }
   }, {})
+  return mergedConfig
 }
 
 function processUrlParams(config: ApiConfig) {
@@ -77,4 +92,16 @@ export function uuid() {
 
 export function wrapReturn<T = unknown>(data: T) {
   return [data].reduce((_, data) => data)
+}
+
+export function isObject(obj: unknown) {
+  return !!obj && typeof obj === 'object'
+}
+
+export function getReqIdHeaderName(config: ApiConfig) {
+  return config.$apiService?.reqIdHeaderName ?? REQ_ID_HEADER
+}
+
+export function getReqStartHeaderName(config: ApiConfig) {
+  return config.$apiService?.reqStartHeaderName ?? REQ_START_HEADER
 }

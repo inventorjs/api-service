@@ -49,20 +49,31 @@ export abstract class ResponseInterceptor {
 
 export interface Logger {
   debug: (msg: unknown) => void
-  info: (msg: unknown) => void
+  log: (msg: unknown) => void
   warn: (msg: unknown) => void
   error: (msg: unknown) => void
 }
 
 export interface LoggerConfig {
-  level?: 'debug' | 'info' | 'warn' | 'error'
-  instance?: Logger
+  logger?: Logger
+  customEventName?: {
+    success?: string
+    error?: string
+  }
+  customAttributeKeys?: {
+    event?: string
+    req?: string
+    res?: string
+    err?: string
+    responseTime?: string
+  }
 }
 
 export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
-  $runtime?: Record<string, unknown>
   $apiService?: {
     observe?: 'body' | 'response'
+    reqIdHeaderName?: string
+    reqStartHeaderName?: string
     genReqId?: { (config: ApiConfig): string | number }
     logger?: boolean | LoggerConfig
     urlParams?: Record<string, number | string>
