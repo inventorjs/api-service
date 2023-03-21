@@ -79,7 +79,7 @@ export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
   }
   $apiService?: {
     observe?: 'body' | 'response'
-    rc?: string
+    rcChannel?: string
     retry?: number
     reqIdHeaderName?: string
     genReqId?: { (config: ApiConfig): string }

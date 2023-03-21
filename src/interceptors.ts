@@ -12,8 +12,7 @@ import { writeLog } from './logger.js'
 
 export class RuntimeRequestInterceptor extends RequestInterceptor {
   static async onFulfilled(config: ApiConfigFinal) {
-    const genReqId = config?.$apiService?.genReqId
-    const reqId = genReqId?.(config)
+    const reqId = config.$runtime?.reqId as string
     const reqIdHeaderName = config?.$apiService?.reqIdHeaderName
     if (reqIdHeaderName) {
       config.headers.set(reqIdHeaderName, reqId)
@@ -21,7 +20,6 @@ export class RuntimeRequestInterceptor extends RequestInterceptor {
     const startTime = performance.now()
     config.$runtime ??= {}
     config.$runtime.startTime = startTime
-    config.$runtime.reqId = reqId
     return config
   }
 }

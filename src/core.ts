@@ -9,6 +9,7 @@ import { CONFIG_META, INSTANCE_META } from './constants.js'
 import { defaults } from './defaults.js'
 
 export class ApiService {
+  private static rcChannelMap = new Map()
   private static inited = false
 
   static async init({
@@ -72,7 +73,7 @@ export class ApiService {
   }
 
   static async apiCall<R, D = unknown>(
-    this: ApiService,
+    this: ClassType<ApiService>,
     data?: D,
     config: ApiConfig = {},
   ) {
@@ -86,23 +87,49 @@ export class ApiService {
     }
 
     const instanceConfig = instance.defaults as unknown as ApiConfig
-    const fullConfig = mergeConfig(instanceConfig, config, { data })
-    const requestConfig = processConfig(fullConfig)
-    let retryCount = requestConfig.$apiService?.retry
-    if (!retryCount || (requestConfig?.method ?? 'get' !== 'get')) {
+    const mergedConfig = mergeConfig(instanceConfig, config, { data })
+    const finalConfig = processConfig(mergedConfig)
+
+    const genReqId = finalConfig?.$apiService?.genReqId
+    const reqId = genReqId?.(config)
+    finalConfig.$runtime ??= {}
+    finalConfig.$runtime.reqId = reqId
+
+    const rcChannel = finalConfig.$apiService?.rcChannel
+    if (rcChannel) {
+      ApiService.rcChannelMap.set(rcChannel, reqId)
+    }
+
+    let retryCount = finalConfig.$apiService?.retry
+    if (!retryCount || (finalConfig?.method ?? 'get' !== 'get')) {
       retryCount = 0
     }
 
-    const response = await lastValueFrom(
-      defer(() => instance.request(requestConfig)).pipe(
-        retry({
-          count: retryCount,
-          delay: (_, retryCount) => timer(Math.pow(retryCount, 2) * 1000),
-        }),
-      ),
+    if (finalConfig.timeout && typeof AbortSignal !== 'undefined') {
+      finalConfig.signal = AbortSignal.timeout(finalConfig.timeout)
+      finalConfig.timeout = 0
+    }
+
+    const observable = defer(() => instance.request(finalConfig)).pipe(
+      retry({
+        count: retryCount,
+        delay: (_, retryCount) => timer(Math.min(2 ** retryCount, 30) * 1000),
+      }),
     )
 
-    if (requestConfig?.$apiService?.observe === 'response') {
+    const response = await lastValueFrom(observable)
+
+    if (rcChannel && ApiService.rcChannelMap.get(rcChannel) !== reqId) {
+      return new Promise(() => {
+        // disccard race condition conflict result
+      })
+    }
+
+    if (rcChannel) {
+      ApiService.rcChannelMap.delete(rcChannel)
+    }
+
+    if (finalConfig?.$apiService?.observe === 'response') {
       return response as R
     }
     return response?.data as R

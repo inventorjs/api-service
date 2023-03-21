@@ -7,7 +7,7 @@ import {
 } from '../index.js'
 
 @Service({
-  baseURL: 'http://cloud.tencent.com',
+  baseURL: 'https://cloud.tencent.com',
 })
 class Test extends ApiService {
   @Api({ url: '/:id' })
@@ -30,6 +30,15 @@ Test.login('123', {
   $apiService: {
     urlParams: { id: 'act' },
     reqIdHeaderName: 'x-req-id',
-    retry: 3,
+    retry: 0,
+    rcChannel: 'act',
   },
-}).catch((e) => console.log(e))
+})
+Test.login('123', {
+  $apiService: {
+    urlParams: { id: 'act' },
+    reqIdHeaderName: 'x-req-id',
+    retry: 0,
+    rcChannel: 'act',
+  },
+})
