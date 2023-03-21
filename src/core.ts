@@ -16,7 +16,7 @@ export class ApiService {
     services,
     config: rootConfig = {},
   }: {
-    services: Record<string, ClassType<ApiService>>
+    services: ClassType<ApiService>[]
     config?: ApiConfig
   }) {
     if (this.inited) {

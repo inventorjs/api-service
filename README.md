@@ -1,24 +1,24 @@
 # api-service
 
-## Features
+## 特性
 
 - 内部请求使用 [Axios](https://github.com/axios/axios) 实现跨平台请求能力
 - 支持 Axios 的所有能力，并进行一定程度的扩展如(retry, race condition, reqId, logger, urlParams 等)
-- 采用规范化装饰器 (@Service, @Api) 定义服务与 API，便于对 API 进行统一管理
-- 自动将 API 定义转化为服务调用，调用方式与本地函数调用方式相同
 - 将 Axios 超时转化为 AbortSignal 处理（axios 内置 timeout 无法处理 node 端连接超时）
 - 支持预定义拦截器，可以将拦截器作为配置信息初始化
+- 采用规范化装饰器 (@Service, @Api) 定义服务与 API，便于对 API 进行统一管理
+- 自动将 API 定义转化为服务调用，调用方式与本地函数调用方式相同
 
-## Installing
+## 安装
 
 ```
 // 注：这里用到了 Reflect 的 metadata 相关特性，需要安装其 polyfill
 pnpm add @inventorjs/api-service@latest reflect-metadata@latest
 ```
 
-## Define
+## 接口说明
 
-### Class
+### Entities
 
 - ApiService: 核心服务类，用于初始化服务，和提供核心接口调用功能，对服务进行初始化
   - init: 初始化所有服务，创建内部请求实例，全局调用一次
@@ -29,7 +29,7 @@ pnpm add @inventorjs/api-service@latest reflect-metadata@latest
 
 ```
 // 提供服务定义配置，可通过 init/@Service/@Api 三个接口传入，并自动进行合并
-// 配置合并顺序 defaults -> init -> @Service -> @Api -> apiCall
+// 配置合并顺序 defaults <- init <- @Service <- @Api <- apiCall
 interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
   // 支持所有其他 Axios 配置参数
   $apiService?: {
@@ -53,7 +53,7 @@ declare class ApiService {
     services,
     config: rootConfig,
   }: {
-    services: Record<string, ClassType<ApiService>>
+    services: ClassType<ApiService>[]
     config?: ApiConfig
   }): Promise<void>
   static apiCall<R, D = unknown>(
@@ -78,7 +78,7 @@ declare function Api(
 ) => void
 ```
 
-## Example
+## 示例
 
 ```
 // user.service.ts
@@ -86,21 +86,21 @@ import { Service, Api, ApiService, type ApiConfig } from '@inventorjs/api-servic
 import { UserService } from './user.service'
 
 @Service({
-  baseURL: 'https://api.publicapis.org',
+  baseURL: 'https://run.mocky.io/v3',
 })
 export class UserService extends ApiService {
-  @Api({ url: '/entries' })
-  static entries(data?: unknown, config?: ApiConfig) {
+  @Api({ url: '/d7389eca-12e9-4e0e-b55e-4704fe7cbfc4' })
+  static getData(data?: void, config?: ApiConfig) {
     return this.apiCall<Record<string, unknown>>(data, config)
   }
 }
 
 // index.ts 初始化 ApiService
 ApiService.init({
-  services: { UserService },
+  services: [UserService],
   config: {
-    timeout: 10000,
     $apiService: {
+      reqIdHeaderName: 'x-req-id',
       observe: 'body',
       retry: 3,
     },
@@ -108,7 +108,7 @@ ApiService.init({
 })
 
 // call api somewhere
-UserService.entries().then((d) => {
+UserService.getData().then((d) => {
   console.log(d)
 })
 ```
