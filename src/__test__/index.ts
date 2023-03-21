@@ -1,44 +1,27 @@
-import {
-  Api,
-  Service,
-  ApiConfig,
-  ApiService,
-  RequestInterceptor,
-} from '../index.js'
+import { Api, Service, ApiConfig, ApiService } from '../index.js'
 
 @Service({
-  baseURL: 'https://cloud.tencent.com',
+  baseURL: 'https://api.publicapis.org',
 })
-class Test extends ApiService {
-  @Api({ url: '/:id' })
-  static login(data?: unknown, config?: ApiConfig<string>) {
-    return this.apiCall<string>(data, config)
+export class UserService extends ApiService {
+  @Api({ url: '/entries' })
+  static entries(data?: unknown, config?: ApiConfig) {
+    return this.apiCall<Record<string, unknown>>(data, config)
   }
 }
 
+// 初始化 ApiService
 ApiService.init({
-  services: { Test },
+  services: { UserService },
   config: {
-    baseURL: 'https://www.baidu.com',
     $apiService: {
-      requestInterceptors: [class interceptor extends RequestInterceptor {}],
+      observe: 'body',
+      retry: 3,
     },
   },
 })
 
-Test.login('123', {
-  $apiService: {
-    urlParams: { id: 'act' },
-    reqIdHeaderName: 'x-req-id',
-    retry: 0,
-    rcChannel: 'act',
-  },
-})
-Test.login('123', {
-  $apiService: {
-    urlParams: { id: 'act' },
-    reqIdHeaderName: 'x-req-id',
-    retry: 0,
-    rcChannel: 'act',
-  },
+// call api somewhere
+UserService.entries().then((d) => {
+  console.log(d)
 })

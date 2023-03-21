@@ -5,7 +5,7 @@ import {
   RuntimeRequestInterceptor,
   RuntimeResponseInterceptor,
 } from './interceptors.js'
-import { uuid } from './util.js'
+import { uuid, isBrowser } from './util.js'
 
 class DefaultLogger {
   static debug(msg: unknown) {
@@ -29,9 +29,11 @@ export const defaults = {
     observe: 'body',
     retry: 0,
     genReqId: uuid,
-    logger: {
-      logger: DefaultLogger,
-    },
+    logger: isBrowser()
+      ? false
+      : {
+          logger: DefaultLogger,
+        },
     requestInterceptors: [RuntimeRequestInterceptor],
     responseInterceptors: [RuntimeResponseInterceptor],
   },

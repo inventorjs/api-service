@@ -96,3 +96,7 @@ export function wrapReturn<T = unknown>(data: T) {
 export function isObject(obj: unknown) {
   return !!obj && typeof obj === 'object'
 }
+
+export function isBrowser() {
+  return typeof window !== 'undefined' && typeof document !== 'undefined'
+}
