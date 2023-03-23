@@ -7,6 +7,7 @@
   "repository": "https://github.com/inventorjs/api-service.git",
   "type": "module",
   "exports": "./dist/index.js",
+  "main": "./dist/index.js",
   "files": [
     "dist/"
   ],
