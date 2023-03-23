@@ -1,7 +1,7 @@
 {
   "name": "@inventorjs/api-service",
   "version": "0.0.15",
-  "description": "api service",
+  "description": "Api service manager base on axios",
   "author": "sunkeysun",
   "license": "MIT",
   "repository": "https://github.com/inventorjs/api-service.git",
@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "test": "ts-node-esm src/__test__/index.ts",
+    "test:rxjs": "ts-node-esm src/__test__/rxjs.ts",
     "build": "rimraf dist && tsc",
     "publish:patch": "pnpm build && pnpm version patch && pnpm publish",
     "publish:minor": "pnpm build && pnpm version minor && pnpm publish",

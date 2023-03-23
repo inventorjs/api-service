@@ -75,6 +75,7 @@ export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
   $runtime?: {
     startTime?: number
     reqId?: string
+    retryCount?: number
     [k: string]: unknown
   }
   $apiService?: {

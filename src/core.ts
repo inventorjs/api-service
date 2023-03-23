@@ -4,7 +4,7 @@
 import type { ClassType, ApiConfig, Instance } from './types.js'
 import axios from 'axios'
 import { defer, lastValueFrom, retry, timer } from 'rxjs'
-import { mergeConfig, processConfig } from './util.js'
+import { mergeConfig, processFinalConfig } from './util.js'
 import { CONFIG_META, INSTANCE_META } from './constants.js'
 import { defaults } from './defaults.js'
 
@@ -75,7 +75,7 @@ export class ApiService {
   static async apiCall<R, D = unknown>(
     this: ClassType<ApiService>,
     data?: D,
-    config: ApiConfig = {},
+    requestConfig: ApiConfig = {},
   ) {
     const instance: Instance = Reflect.getMetadata(INSTANCE_META, this)
     if (!instance) {
@@ -87,11 +87,11 @@ export class ApiService {
     }
 
     const instanceConfig = instance.defaults as unknown as ApiConfig
-    const mergedConfig = mergeConfig(instanceConfig, config, { data })
-    const finalConfig = processConfig(mergedConfig)
+    const mergedConfig = mergeConfig(instanceConfig, requestConfig, { data })
+    const finalConfig = processFinalConfig(mergedConfig)
 
     const genReqId = finalConfig?.$apiService?.genReqId
-    const reqId = genReqId?.(config)
+    const reqId = genReqId?.(finalConfig)
     finalConfig.$runtime ??= {}
     finalConfig.$runtime.reqId = reqId
 
@@ -113,7 +113,11 @@ export class ApiService {
     const observable = defer(() => instance.request(finalConfig)).pipe(
       retry({
         count: retryCount,
-        delay: (_, retryCount) => timer(Math.min(2 ** retryCount, 30) * 1000),
+        delay: (_, retryCount) => {
+          finalConfig.$runtime ??= {}
+          finalConfig.$runtime.retryCount = retryCount
+          return timer(Math.min(2 ** retryCount, 30) * 1000)
+        },
       }),
     )
 

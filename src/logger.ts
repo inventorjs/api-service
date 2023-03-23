@@ -9,6 +9,7 @@ import type {
   ApiConfigFinal,
   Headers,
 } from './types.js'
+import { getFinalURL } from './util.js'
 
 type logFun = keyof Logger
 
@@ -35,8 +36,8 @@ export function writeLog({
   const logger = loggerConfig.logger as Logger
   let level: logFun = 'log'
 
-  const url = `${config.baseURL}${config.url}`
-  const urlObj = new URL(url)
+  const finalURL = getFinalURL(config)
+  const finalURLObj = new URL(finalURL)
   const eventKey = loggerConfig?.customAttributeKeys?.event ?? 'event'
   const reqKey = loggerConfig?.customAttributeKeys?.req ?? 'req'
   const resKey = loggerConfig?.customAttributeKeys?.res ?? 'res'
@@ -49,12 +50,12 @@ export function writeLog({
     [eventKey]: eventSuccess,
     [reqKey]: {
       id: reqId,
-      url,
+      url: finalURL,
       method: config.method,
       query: config.params,
       params: config.$apiService?.urlParams,
       headers: config.headers.toJSON(),
-      pathname: urlObj.pathname,
+      pathname: finalURLObj.pathname,
       body: config.data,
     },
     [resKey]: {

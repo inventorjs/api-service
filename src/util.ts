@@ -1,12 +1,25 @@
 /**
  * util
  */
-import type { ApiConfig, LoggerConfig, RequestHeaders } from './types.js'
+import type {
+  ApiConfig,
+  ApiConfigFinal,
+  LoggerConfig,
+  RequestHeaders,
+} from './types.js'
 import { v4 } from 'uuid'
 
 export function mergeConfig(...configList: ApiConfig[]) {
   const mergedConfig = configList.reduce((result, config) => {
     if (!config) return result
+
+    let baseURL = result.baseURL ?? ''
+
+    if (isRootURL(config.baseURL) || isURL(config.baseURL)) {
+      baseURL = config.baseURL ?? ''
+    } else {
+      baseURL += config.baseURL ?? ''
+    }
 
     const apiService: ApiConfig['$apiService'] = {
       ...(result?.$apiService ?? {}),
@@ -40,6 +53,7 @@ export function mergeConfig(...configList: ApiConfig[]) {
     return {
       ...result,
       ...config,
+      baseURL,
       headers,
       $apiService: {
         ...apiService,
@@ -66,10 +80,15 @@ function processUrlParams(config: ApiConfig) {
   return url
 }
 
-export function processConfig(config: ApiConfig) {
+function processRootUrl(url = '') {
+  return url.replace('^', '')
+}
+
+export function processFinalConfig(config: ApiConfig) {
   const url = processUrlParams(config)
+  const baseURL = processRootUrl(config.baseURL)
   return [config].reduce((result) => {
-    return { ...result, url }
+    return { ...result, url, baseURL }
   }, config)
 }
 
@@ -99,4 +118,44 @@ export function isObject(obj: unknown) {
 
 export function isBrowser() {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
+}
+
+export function isURL(url = '') {
+  return url?.startsWith('http') || url?.startsWith('//')
+}
+
+export function isRootURL(url = '') {
+  return url.startsWith('^')
+}
+
+export function getProtocolURL(url: string) {
+  if (url?.startsWith('//')) {
+    if (isBrowser()) {
+      return `${location.protocol}${url}`
+    } else {
+      return `http:${url}`
+    }
+  }
+  return url
+}
+
+export function getOriginURL(url: string) {
+  if (isBrowser()) {
+    return `${location.origin}${url}`
+  } else {
+    return `http://127.0.0.1${url}`
+  }
+}
+
+export function getFinalURL(config: ApiConfigFinal) {
+  const { url = '', baseURL = '' } = config
+  if (isURL(url)) {
+    return getProtocolURL(url)
+  } else {
+    if (isURL(baseURL)) {
+      return `${getProtocolURL(baseURL)}${url}`
+    } else {
+      return `${getOriginURL(baseURL)}${url}`
+    }
+  }
 }
