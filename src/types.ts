@@ -22,8 +22,6 @@ export type RequestInteceptorOnFulfilled = RequestInteceptorInternal[0]
 export type RequestInteceptorOnRejected = RequestInteceptorInternal[1]
 export type RequestInteceptorOptions = RequestInteceptorInternal[2]
 
-export type ResponseInteceptorOnFulfilled = ResponseInteceptorInternal[0]
-export type ResponseInteceptorOnRejected = ResponseInteceptorInternal[1]
 export type ResponseInteceptorOptions = ResponseInteceptorInternal[2]
 
 export type ClassType<T = unknown> = { new (): T }
@@ -38,15 +36,17 @@ export interface ResponseError extends AxiosError {
 }
 
 export abstract class RequestInterceptor {
-  static options: RequestInteceptorOptions
-  static onFulfilled: RequestInteceptorOnFulfilled
-  static onRejected: RequestInteceptorOnRejected
+  options: RequestInteceptorOptions
+  abstract onFulfilled<T = unknown>(
+    config: ApiConfigFinal,
+  ): Promise<ApiConfigFinal>
+  abstract onRejected<T = unknown>(error: T): Promise<T | undefined | null>
 }
 
 export abstract class ResponseInterceptor {
-  static options: ResponseInteceptorOptions
-  static onFulfilled: ResponseInteceptorOnFulfilled
-  static onRejected: ResponseInteceptorOnRejected
+  options: ResponseInteceptorOptions = {}
+  abstract onFulfilled(response: Response): Promise<Response>
+  abstract onRejected(error: unknown): Promise<unknown>
 }
 
 export interface Logger {
@@ -78,16 +78,16 @@ export interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
     retryCount?: number
     [k: string]: unknown
   }
-  $apiService?: {
+  $ext?: {
     observe?: 'body' | 'response'
+    params?: Record<string, number | string>
     rcChannel?: string
     retry?: number
     reqIdHeaderName?: string
     genReqId?: { (config: ApiConfig): string }
     logger?: boolean | LoggerConfig
-    urlParams?: Record<string, number | string>
-    requestInterceptors?: (typeof RequestInterceptor)[]
-    responseInterceptors?: (typeof ResponseInterceptor)[]
+    requestInterceptors?: (new () => RequestInterceptor)[]
+    responseInterceptors?: (new () => ResponseInterceptor)[]
   }
 }
 

@@ -12,8 +12,7 @@
 ## 安装
 
 ```
-// 注：这里用到了 Reflect 的 metadata 相关特性，需要安装其 polyfill
-pnpm add @inventorjs/api-service@latest reflect-metadata@latest
+pnpm add @inventorjs/api-service@latest
 ```
 
 ## 接口说明

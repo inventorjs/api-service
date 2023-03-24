@@ -1,4 +1,11 @@
-import { Api, Service, ApiConfig, ApiService } from '../index.js'
+import {
+  Api,
+  Service,
+  ApiConfig,
+  ApiService,
+  RequestInterceptor,
+  ApiConfigFinal,
+} from '../index.js'
 
 @Service({
   baseURL: '/api',
@@ -15,7 +22,7 @@ ApiService.init({
   services: [UserService],
   config: {
     baseURL: '^https://run.mocky.io/v9',
-    $apiService: {
+    $ext: {
       reqIdHeaderName: 'x-req-id',
       observe: 'body',
       retry: 3,

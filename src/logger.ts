@@ -26,8 +26,8 @@ export function writeLog({
   reqId: string
   error?: ResponseError
 }) {
-  const apiService = config.$apiService
-  const loggerConfig = apiService?.logger as LoggerConfig
+  const extConfig = config.$ext
+  const loggerConfig = extConfig?.logger as LoggerConfig
 
   if (!loggerConfig) {
     return
@@ -53,7 +53,7 @@ export function writeLog({
       url: finalURL,
       method: config.method,
       query: config.params,
-      params: config.$apiService?.urlParams,
+      params: extConfig?.urlParams,
       headers: config.headers.toJSON(),
       pathname: finalURLObj.pathname,
       body: config.data,

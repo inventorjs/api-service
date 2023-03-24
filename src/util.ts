@@ -21,17 +21,17 @@ export function mergeConfig(...configList: ApiConfig[]) {
       baseURL += config.baseURL ?? ''
     }
 
-    const apiService: ApiConfig['$apiService'] = {
-      ...(result?.$apiService ?? {}),
-      ...(config?.$apiService ?? {}),
+    const extConfig: ApiConfig['$ext'] = {
+      ...(result?.$ext ?? {}),
+      ...(config?.$ext ?? {}),
     }
 
     const headers: RequestHeaders = lowercaseKey<RequestHeaders>({
       ...(result?.headers ?? {}),
       ...(config?.headers ?? {}),
     })
-    let logger = result.$apiService?.logger ?? {}
-    const configLogger = config.$apiService?.logger
+    let logger = result.$ext?.logger ?? {}
+    const configLogger = config.$ext?.logger
     if (isObject(logger) && isObject(configLogger)) {
       logger = {
         ...(logger as LoggerConfig),
@@ -43,20 +43,20 @@ export function mergeConfig(...configList: ApiConfig[]) {
       }
     }
 
-    const requestInterceptors = (
-      result.$apiService?.requestInterceptors ?? []
-    ).concat(config.$apiService?.requestInterceptors ?? [])
+    const requestInterceptors = (result.$ext?.requestInterceptors ?? []).concat(
+      config.$ext?.requestInterceptors ?? [],
+    )
     const responseInterceptors = (
-      result.$apiService?.responseInterceptors ?? []
-    ).concat(config.$apiService?.responseInterceptors ?? [])
+      result.$ext?.responseInterceptors ?? []
+    ).concat(config.$ext?.responseInterceptors ?? [])
 
     return {
       ...result,
       ...config,
       baseURL,
       headers,
-      $apiService: {
-        ...apiService,
+      $ext: {
+        ...extConfig,
         logger,
         requestInterceptors,
         responseInterceptors,
@@ -68,13 +68,11 @@ export function mergeConfig(...configList: ApiConfig[]) {
 
 function processUrlParams(config: ApiConfig) {
   let url = config?.url ?? ''
-  if (
-    config.$apiService?.urlParams &&
-    Object.keys(config.$apiService.urlParams).length > 0
-  ) {
-    const { urlParams } = config.$apiService
-    Object.keys(urlParams).forEach((key) => {
-      url = url?.replace(`:${key}`, String(urlParams[key]))
+  const extConfig = config.$ext
+  if (extConfig?.params && Object.keys(extConfig.params).length > 0) {
+    const { params } = extConfig
+    Object.keys(params).forEach((key) => {
+      url = url?.replace(`:${key}`, String(params[key]))
     })
   }
   return url
@@ -99,7 +97,7 @@ export function processConfig(config: ApiConfig, data: unknown) {
     signal = AbortSignal.timeout(config.timeout)
     timeout = 0
   }
-  let retry = config.$apiService?.retry
+  let retry = config.$ext?.retry
   if (!retry || config?.method !== 'get') {
     retry = 0
   }
@@ -114,8 +112,8 @@ export function processConfig(config: ApiConfig, data: unknown) {
       signal,
       timeout,
       data,
-      $apiService: {
-        ...config.$apiService,
+      $ext: {
+        ...config.$ext,
         retry,
       },
     }

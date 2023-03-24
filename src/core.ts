@@ -43,29 +43,28 @@ export class ApiService {
         serviceConfig,
       )
       const instance = axios.create(definedConfig)
+      const extConfig = definedConfig.$ext
 
-      if (definedConfig.$apiService?.requestInterceptors) {
-        definedConfig.$apiService?.requestInterceptors.forEach(
-          (requestInterceptor) => {
-            instance.interceptors.request.use(
-              requestInterceptor.onFulfilled,
-              requestInterceptor.onRejected,
-              requestInterceptor.options,
-            )
-          },
-        )
+      if (extConfig?.requestInterceptors) {
+        extConfig?.requestInterceptors.forEach((RequestInterceptor) => {
+          const requestInterceptor = new RequestInterceptor()
+          instance.interceptors.request.use(
+            requestInterceptor.onFulfilled,
+            requestInterceptor.onRejected,
+            requestInterceptor.options,
+          )
+        })
       }
 
-      if (definedConfig.$apiService?.responseInterceptors) {
-        definedConfig.$apiService?.responseInterceptors.forEach(
-          (responseInterceptor) => {
-            instance.interceptors.response.use(
-              responseInterceptor.onFulfilled,
-              responseInterceptor.onRejected,
-              responseInterceptor.options,
-            )
-          },
-        )
+      if (extConfig?.responseInterceptors) {
+        extConfig?.responseInterceptors.forEach((ResponseInterceptor) => {
+          const responseInterceptor = new ResponseInterceptor()
+          instance.interceptors.response.use(
+            responseInterceptor.onFulfilled,
+            responseInterceptor.onRejected,
+            responseInterceptor.options,
+          )
+        })
       }
 
       Reflect.defineMetadata(INSTANCE_META, instance, Srv)
@@ -90,19 +89,20 @@ export class ApiService {
     const mergedConfig = mergeConfig(instanceConfig, requestConfig)
     const config = processConfig(mergedConfig, data)
 
-    const genReqId = config?.$apiService?.genReqId
+    const extConfig = config.$ext
+    const genReqId = extConfig?.genReqId
     const reqId = genReqId?.(config)
     config.$runtime ??= {}
     config.$runtime.reqId = reqId
 
-    const rcChannel = config.$apiService?.rcChannel
+    const rcChannel = extConfig?.rcChannel
     if (rcChannel) {
       ApiService.rcChannelMap.set(rcChannel, reqId)
     }
 
     const observable = defer(() => instance.request(config)).pipe(
       retry({
-        count: config?.$apiService?.retry ?? 0,
+        count: extConfig?.retry ?? 0,
         delay: (_, retryCount) => {
           config.$runtime ??= {}
           config.$runtime.retryCount = retryCount
@@ -123,7 +123,7 @@ export class ApiService {
       ApiService.rcChannelMap.delete(rcChannel)
     }
 
-    if (config?.$apiService?.observe === 'response') {
+    if (extConfig?.observe === 'response') {
       return response as R
     }
     return response?.data as R

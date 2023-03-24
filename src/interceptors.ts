@@ -11,9 +11,9 @@ import {
 import { writeLog } from './logger.js'
 
 export class RuntimeRequestInterceptor extends RequestInterceptor {
-  static async onFulfilled(config: ApiConfigFinal) {
+  async onFulfilled(config: ApiConfigFinal) {
     const reqId = config.$runtime?.reqId as string
-    const reqIdHeaderName = config?.$apiService?.reqIdHeaderName
+    const reqIdHeaderName = config?.$ext?.reqIdHeaderName
     if (reqIdHeaderName) {
       config.headers.set(reqIdHeaderName, reqId)
     }
@@ -22,10 +22,13 @@ export class RuntimeRequestInterceptor extends RequestInterceptor {
     config.$runtime.startTime = startTime
     return config
   }
+  async onRejected<T = unknown>(error: T) {
+    return Promise.reject(error)
+  }
 }
 
 export class RuntimeResponseInterceptor extends ResponseInterceptor {
-  static async onFulfilled(response: Response) {
+  async onFulfilled(response: Response) {
     const config = response.config
     const endTime = performance.now()
     const reqId = config.$runtime?.reqId as string
@@ -37,10 +40,10 @@ export class RuntimeResponseInterceptor extends ResponseInterceptor {
     return response
   }
 
-  static async onRejected(error: ResponseError) {
+  async onRejected(error: ResponseError) {
     const config = error.config
     const endTime = performance.now()
-    const reqIdHeaderName = config?.$apiService?.reqIdHeaderName as string
+    const reqIdHeaderName = config?.$ext?.reqIdHeaderName as string
     const reqId = config.headers.get(reqIdHeaderName) as string
     const response = error.response
     const startTime = config.$runtime?.startTime as number
