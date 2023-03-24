@@ -113,6 +113,7 @@ export function processConfig(config: ApiConfig, data: unknown) {
       params,
       signal,
       timeout,
+      data,
       $apiService: {
         ...config.$apiService,
         retry,
