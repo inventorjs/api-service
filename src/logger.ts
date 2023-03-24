@@ -53,7 +53,7 @@ export function writeLog({
       url: finalURL,
       method: config.method,
       query: config.params,
-      params: extConfig?.urlParams,
+      params: extConfig?.params,
       headers: config.headers.toJSON(),
       pathname: finalURLObj.pathname,
       body: config.data,
