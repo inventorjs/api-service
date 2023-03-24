@@ -84,11 +84,40 @@ function processRootUrl(url = '') {
   return url.replace('^', '')
 }
 
-export function processFinalConfig(config: ApiConfig) {
+export function processConfig(config: ApiConfig, data: unknown) {
   const url = processUrlParams(config)
   const baseURL = processRootUrl(config.baseURL)
+  const method = config?.method ? config?.method.toLowerCase() : 'get'
+  const params =
+    ['get', 'delete'].includes(method) &&
+    isObject(data) &&
+    Object.keys(data as object).length > 0
+      ? data
+      : config.params
+  let { signal, timeout } = config
+  if (!signal && config.timeout && typeof AbortSignal !== 'undefined') {
+    signal = AbortSignal.timeout(config.timeout)
+    timeout = 0
+  }
+  let retry = config.$apiService?.retry
+  if (!retry || config?.method !== 'get') {
+    retry = 0
+  }
+
   return [config].reduce((result) => {
-    return { ...result, url, baseURL }
+    return {
+      ...result,
+      url,
+      baseURL,
+      method,
+      params,
+      signal,
+      timeout,
+      $apiService: {
+        ...config.$apiService,
+        retry,
+      },
+    }
   }, config)
 }
 

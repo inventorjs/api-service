@@ -4,7 +4,7 @@
 import type { ClassType, ApiConfig, Instance } from './types.js'
 import axios from 'axios'
 import { defer, lastValueFrom, retry, timer } from 'rxjs'
-import { mergeConfig, processFinalConfig } from './util.js'
+import { mergeConfig, processConfig } from './util.js'
 import { CONFIG_META, INSTANCE_META } from './constants.js'
 import { defaults } from './defaults.js'
 
@@ -87,35 +87,25 @@ export class ApiService {
     }
 
     const instanceConfig = instance.defaults as unknown as ApiConfig
-    const mergedConfig = mergeConfig(instanceConfig, requestConfig, { data })
-    const finalConfig = processFinalConfig(mergedConfig)
+    const mergedConfig = mergeConfig(instanceConfig, requestConfig)
+    const config = processConfig(mergedConfig, data)
 
-    const genReqId = finalConfig?.$apiService?.genReqId
-    const reqId = genReqId?.(finalConfig)
-    finalConfig.$runtime ??= {}
-    finalConfig.$runtime.reqId = reqId
+    const genReqId = config?.$apiService?.genReqId
+    const reqId = genReqId?.(config)
+    config.$runtime ??= {}
+    config.$runtime.reqId = reqId
 
-    const rcChannel = finalConfig.$apiService?.rcChannel
+    const rcChannel = config.$apiService?.rcChannel
     if (rcChannel) {
       ApiService.rcChannelMap.set(rcChannel, reqId)
     }
 
-    let retryCount = finalConfig.$apiService?.retry
-    if (!retryCount || (finalConfig?.method ?? 'get' !== 'get')) {
-      retryCount = 0
-    }
-
-    if (finalConfig.timeout && typeof AbortSignal !== 'undefined') {
-      finalConfig.signal = AbortSignal.timeout(finalConfig.timeout)
-      finalConfig.timeout = 0
-    }
-
-    const observable = defer(() => instance.request(finalConfig)).pipe(
+    const observable = defer(() => instance.request(config)).pipe(
       retry({
-        count: retryCount,
+        count: config?.$apiService?.retry ?? 0,
         delay: (_, retryCount) => {
-          finalConfig.$runtime ??= {}
-          finalConfig.$runtime.retryCount = retryCount
+          config.$runtime ??= {}
+          config.$runtime.retryCount = retryCount
           return timer(Math.min(2 ** retryCount, 30) * 1000)
         },
       }),
@@ -133,7 +123,7 @@ export class ApiService {
       ApiService.rcChannelMap.delete(rcChannel)
     }
 
-    if (finalConfig?.$apiService?.observe === 'response') {
+    if (config?.$apiService?.observe === 'response') {
       return response as R
     }
     return response?.data as R

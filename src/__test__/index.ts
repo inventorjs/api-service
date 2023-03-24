@@ -24,6 +24,6 @@ ApiService.init({
 })
 
 // call api somewhere
-UserService.getData().then((data) => {
+UserService.getData({ name: 'sunkeysun' }).then((data) => {
   console.log('data:', data)
 })
