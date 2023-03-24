@@ -1,11 +1,4 @@
-import {
-  Api,
-  Service,
-  ApiConfig,
-  ApiService,
-  RequestInterceptor,
-  ApiConfigFinal,
-} from '../index.js'
+import { Api, Service, ApiConfig, ApiService } from '../index.js'
 
 @Service({
   baseURL: '/api',
