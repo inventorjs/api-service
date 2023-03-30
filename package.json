@@ -2,6 +2,7 @@
   "name": "@inventorjs/api-service",
   "version": "0.0.22",
   "description": "Api service manager base on axios",
+  "keywords": ["axios", "api-service"],
   "author": "sunkeysun",
   "license": "MIT",
   "repository": "https://github.com/inventorjs/api-service.git",
@@ -11,7 +12,7 @@
   "files": [
     "dist/"
   ],
-  "packageManager": "pnpm@7.13.2",
+  "packageManager": "pnpm@7.30.5",
   "publishConfig": {
     "access": "public"
   },
