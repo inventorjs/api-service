@@ -1,6 +1,6 @@
 {
   "name": "@inventorjs/api-service",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "Api service manager base on axios",
   "author": "sunkeysun",
   "license": "MIT",
