@@ -30,8 +30,11 @@ pnpm add @inventorjs/api-service@latest
 // 提供服务定义配置，可通过 init/@Service/@Api 三个接口传入，并自动进行合并
 // 配置合并顺序 defaults <- init <- @Service <- @Api <- apiCall
 interface ApiConfig<D = unknown> extends AxiosRequestConfig<D> {
+  // ...
   // 支持所有其他 Axios 配置参数
-  $apiService?: {
+
+  // 扩展配置
+  $ext?: {
     observe?: 'body' | 'response' // 选择获取响应对象/响应体(response.data)，默认 response
     rcChannel?: string // race condition channel, 用于解决请求竞态问题，返回最新的数据
     retry?: number // 失败重试次数，默认不重试，默认重试延时：Math.min(2 ** retryCount, 30) * 1000
@@ -98,7 +101,7 @@ export class UserService extends ApiService {
 ApiService.init({
   services: [UserService],
   config: {
-    $apiService: {
+    $ext: {
       reqIdHeaderName: 'x-req-id',
       observe: 'body',
       retry: 3,
