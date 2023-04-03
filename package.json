@@ -1,6 +1,6 @@
 {
   "name": "@inventorjs/api-service",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "Api service manager base on axios",
   "keywords": [
     "axios",
