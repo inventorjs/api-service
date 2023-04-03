@@ -100,7 +100,7 @@ export class ApiService {
       ApiService.rcChannelMap.set(rcChannel, reqId)
     }
 
-    const observable = defer(() => instance.request(config)).pipe(
+    const stream$ = defer(() => instance.request(config)).pipe(
       retry({
         count: extConfig?.retry ?? 0,
         delay: (_, retryCount) => {
@@ -111,7 +111,7 @@ export class ApiService {
       }),
     )
 
-    const response = await lastValueFrom(observable)
+    const response = await lastValueFrom(stream$)
 
     if (rcChannel && ApiService.rcChannelMap.get(rcChannel) !== reqId) {
       return new Promise(() => {

@@ -93,7 +93,13 @@ export function processConfig(config: ApiConfig, data: unknown) {
       ? data
       : config.params
   let { signal, timeout } = config
-  if (!signal && config.timeout && typeof AbortSignal !== 'undefined') {
+  // node 端连接超时需要特殊处理，默认TCP连接超时(timeout 参数为连接后超时)无法修改(约2分钟)
+  if (
+    !isBrowser() &&
+    !signal &&
+    config.timeout &&
+    typeof AbortSignal !== 'undefined'
+  ) {
     signal = AbortSignal.timeout(config.timeout)
     timeout = 0
   }
