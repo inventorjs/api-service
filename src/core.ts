@@ -71,11 +71,11 @@ export class ApiService {
     })
   }
 
-  static async apiCall<R, D = unknown>(
+  static async apiCall<R = unknown, D = unknown>(
     this: ClassType<ApiService>,
     data?: D,
     requestConfig: ApiConfig = {},
-  ) {
+  ): Promise<R> {
     const instance: Instance = Reflect.getMetadata(INSTANCE_META, this)
     if (!instance) {
       throw new Error(
