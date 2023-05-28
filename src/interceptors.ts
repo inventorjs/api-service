@@ -44,7 +44,7 @@ export class RuntimeResponseInterceptor extends ResponseInterceptor {
     const config = error.config
     const endTime = performance.now()
     const reqIdHeaderName = config?.$ext?.reqIdHeaderName as string
-    const reqId = config.headers.get(reqIdHeaderName) as string
+    const reqId = config?.headers?.get?.(reqIdHeaderName) as string
     const response = error.response
     const startTime = config.$runtime?.startTime as number
     const responseTime = Math.floor(endTime - startTime)
