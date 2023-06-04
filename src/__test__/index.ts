@@ -12,7 +12,7 @@ export class UserService extends ApiService {
 
 // 初始化 ApiService
 ApiService.init({
-  services: [UserService],
+  services: { UserService },
   config: {
     baseURL: '^https://run.mocky.io/v9',
     $ext: {

@@ -16,12 +16,9 @@ export class ApiService {
     services,
     config: rootConfig = {},
   }: {
-    services: ClassType<ApiService>[]
+    services: Record<string, ClassType<ApiService>>
     config?: ApiConfig
   }) {
-    if (this.inited) {
-      throw new Error('ApiService can only be initialized once!')
-    }
     if (!Object.keys(services).length) {
       console.error(
         'There is no service to initialize. please check services config',
